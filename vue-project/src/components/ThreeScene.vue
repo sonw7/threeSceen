@@ -4,6 +4,114 @@
 
 <script>
 import { onMounted, onUnmounted, ref } from 'vue';
+import SceneManager from './SceneManager';
+
+export default {
+  name: 'ThreeScene',
+  setup() {
+    const sceneContainer = ref(null);
+    let sceneManager;
+
+    onMounted(() => {
+      if (sceneContainer.value) {
+        // 初始化管理类
+        sceneManager = new SceneManager(sceneContainer.value);
+        sceneManager.init();
+ // 添加示例数据
+ sceneManager.addData({
+          type: 'points',
+          data: [
+            -4, -1, 0,
+            -2, -1, 0,
+            -3, 1, 0,
+          ],
+          layer: 'pointsLayer',
+          options: { color: 0xff0000, size: 0.2 },
+        });
+
+        // 添加支持顶点索引的网格
+        sceneManager.addData({
+          type: 'indices',
+          data: {
+            vertices: [
+              -1, -1, -10,
+              1, -1, -10,
+              0, 1, -10,
+            ],
+            indices: [0, 1, 2], // 定义三角形面
+          },
+          layer: 'indexedLayer',
+          options: { color: 0x0000ff },
+        });
+         // 添加三角面数据
+         sceneManager.addData({
+          type: 'triangleMesh',
+          data: {
+            vertices: [
+              3, -1, 0, // 顶点 0
+              5, -1, 0,  // 顶点 1
+              4, 1, 0,   // 顶点 2
+            ],
+            indices: [0, 1, 2], // 定义一个三角面
+          },
+          layer: 'triangleLayer',
+          options: { color: "#5cf5d0" },
+        });
+        // sceneManager.addData({
+        //   type: 'model',
+        //   data: '/path/to/model.glb',
+        //   layer: 'modelLayer',
+        //   options: { scale: 2 },
+        // });
+
+        sceneManager.addData({
+          type: 'custom',
+          data: null,
+          layer: 'customLayer',
+          options: {
+            renderFunction: (data, THREE) => {
+              const geometry = new THREE.TorusGeometry(1, 0.4, 16, 100);
+              const material = new THREE.MeshBasicMaterial({ color:"#a375f5" });
+              return new THREE.Mesh(geometry, material);
+            },
+          },
+        });
+        // 监听窗口大小变化
+        window.addEventListener('resize', () => sceneManager.onWindowResize());
+      }
+    });
+
+    onUnmounted(() => {
+      // 清理资源
+      if (sceneManager) {
+        sceneManager.dispose();
+      }
+
+      window.removeEventListener('resize', () =>
+        sceneManager.onWindowResize()
+      );
+    });
+
+    return {
+      sceneContainer,
+    };
+  },
+};
+</script>
+
+<style scoped>
+div {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+</style>
+<!-- <template>
+  <div ref="sceneContainer"></div>
+</template>
+
+<script>
+import { onMounted, onUnmounted, ref } from 'vue';
 import * as THREE from 'three';
 
 export default {
@@ -73,4 +181,4 @@ export default {
 div {
   overflow: hidden;
 }
-</style>
+</style> -->
